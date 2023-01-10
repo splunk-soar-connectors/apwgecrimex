@@ -1,0 +1,133 @@
+{
+    "appid": "44227d8c-3db9-4b1c-b173-9c340fdf0bb0",
+    "name": "APWG eCrime Exchange",
+    "description": "APWG eCrime Exchange connector",
+    "type": "reputation",
+    "product_vendor": "APWG",
+    "logo": "apwgecrimeexchange.png",
+    "logo_dark": "apwgecrimeexchange_dark.png",
+    "product_name": "eCrimeX",
+    "python_version": "3",
+    "product_version_regex": ".*",
+    "publisher": "Asurion",
+    "contributors": [
+      {
+        "name": "Garrett Logan, Chris Hutto"
+      }
+    ],
+    "license": " ",
+    "app_version": "1.0.0",
+    "utctime_updated": "2022-09-20T18:01:00.950982Z",
+    "package_name": "phantom_apwgecrimeexchange",
+    "main_module": "apwgecrimeexchange_connector.py",
+    "min_phantom_version": "5.3.2.88192",
+    "app_wizard_version": "1.0.0",
+    "configuration": {
+        "Authorization Key": {
+            "description": "eCrimeX API Key",
+            "data_type": "password",
+            "required": true,
+            "order": 0,
+            "name": "Authorization Key",
+            "id": 0
+        }
+    },
+    "actions": [
+        {
+            "action": "test connectivity",
+            "identifier": "test_connectivity",
+            "description": "Validate the asset configuration for connectivity using supplied configuration",
+            "verbose": "",
+            "type": "test",
+            "read_only": true,
+            "parameters": {},
+            "output": [],
+            "versions": "EQ(*)"
+        },
+        {
+            "action": "url reputation",
+            "identifier": "url_reputation",
+            "description": "Queries URL info",
+            "verbose": "",
+            "type": "investigate",
+            "read_only": true,
+            "parameters": {
+                "url": {
+                    "description": "URL to query",
+                    "data_type": "string",
+                    "required": true,
+                    "primary": true,
+                    "contains": [],
+                    "value_list": [],
+                    "default": "",
+                    "order": 0,
+                    "name": "url"
+                },
+                "filter": {
+                    "description": "phish endpoint to query",
+                    "data_type": "string",
+                    "required": true,
+                    "primary": false,
+                    "value_list": [
+                        "url_exact",
+                        "domain",
+                        "url"
+                    ],
+                    "default": "",
+                    "order": 1,
+                    "name": "filter"
+                },
+                "sanitize_url": {
+                    "description": "Sanitizes provided URL ",
+                    "data_type": "boolean",
+                    "order": 2
+                }
+            },
+            "output": [
+                {
+                    "data_path": "action_result.data.*._embedded.phish.*.url",
+                    "data_type": "string",
+                    "contains": [
+                        "url"
+                    ],
+                    "column_name": "url",
+                    "column_order": 0
+                },
+                {
+                    "data_path": "action_result.data.*.total_found",
+                    "data_type": "numeric",
+                    "column_name": "Entry Found",
+                    "column_order": 1
+                },
+                {
+                    "data_path": "action_result.data.*._embedded.phish.*.confidence_level",
+                    "data_type": "numeric",
+                    "column_name": "Confidence Level",
+                    "column_order": 2
+                },
+                {
+                    "data_path": "action_result.data.*._embedded.phish.*.status",
+                    "data_type": "numeric",
+                    "column_name": "Status",
+                    "column_order": 3
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "summary.total_objects",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "summary.total_objects_successful",
+                    "data_type": "numeric"
+                }
+            ],
+            "render": {
+                "type": "table"
+            },
+            "versions": "EQ(*)"
+        }
+    ]
+}
