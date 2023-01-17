@@ -70,7 +70,7 @@
                     "name": "filter"
                 },
                 "sanitize_url": {
-                    "description": "Sanitizes provided URL ",
+                    "description": "Sanitizes provided URL",
                     "data_type": "boolean",
                     "order": 2
                 }

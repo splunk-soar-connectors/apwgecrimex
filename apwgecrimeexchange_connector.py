@@ -20,12 +20,13 @@ from urllib.parse import urlparse
 
 # Phantom App imports
 import phantom.app as phantom
-# Usage of the consts file is recommended
-# from apwgecrimeexchange_consts import *
 import requests
 from bs4 import BeautifulSoup
 from phantom.action_result import ActionResult
 from phantom.base_connector import BaseConnector
+
+# Usage of the consts file is recommended
+from apwgecrimeexchange_consts import *
 
 
 class RetVal(tuple):
@@ -65,11 +66,14 @@ class ApwgEcrimeExchangeConnector(BaseConnector):
 
         try:
             soup = BeautifulSoup(response.text, "html.parser")
+            # Remove the script, style, footer and navigation part from the HTML message
+            for element in soup(["script", "style", "footer", "nav"]):
+                element.extract()
             error_text = soup.text
             split_lines = error_text.split('\n')
             split_lines = [x.strip() for x in split_lines if x.strip()]
             error_text = '\n'.join(split_lines)
-        except:
+        except Exception:
             error_text = "Cannot parse error details"
 
         message = "Status Code: {0}. Data from server:\n{1}\n".format(status_code, error_text)
@@ -199,15 +203,10 @@ class ApwgEcrimeExchangeConnector(BaseConnector):
         if phantom.is_fail(ret_val):
             # the call to the 3rd party device or service failed, action result should contain all the error details
             # for now the return is commented out, but after implementation, return from here
-            self.save_progress("Test Connectivity Failed.")
-            # return action_result.get_status()
+            self.save_progress(ECRIMEX_ERR_CONNECTIVITY_TEST)
+            return action_result.get_status()
 
-        # Return success
-        # self.save_progress("Test Connectivity Passed")
-        # return action_result.set_status(phantom.APP_SUCCESS)
-
-        # For now return Error with a message, in case of success we don't set the message, but use the summary
-        self.save_progress("Validated connectivity to APWG eCrime Exchange.")
+        self.save_progress(ECRIMEX_SUCC_CONNECTIVITY_TEST)
         return action_result.set_status(phantom.APP_SUCCESS)
 
     def _handle_url_reputation(self, param):
@@ -235,7 +234,7 @@ class ApwgEcrimeExchangeConnector(BaseConnector):
         time = self.get_epoch_time()
 
         if 'exact' in filter1 and sanitize:
-            return action_result.set_status(phantom.APP_ERROR, "Cannot sanitize exact URL!")
+            return action_result.set_status(phantom.APP_ERROR, ECRIMEX_SANITIZE_ERR_MESSAGE)
 
         # Parsing url to remove sensitive data
         # Only need URL Scheme and netloc to query the ecrime database
@@ -257,10 +256,8 @@ class ApwgEcrimeExchangeConnector(BaseConnector):
         )
         self.debug_print(ret_val)
         self.debug_print(response)
+
         if phantom.is_fail(ret_val):
-            # the call to the 3rd party device or service failed, action result should contain all the error details
-            # for now the return is commented out, but after implementation, return from here
-            self.save_progress("Test Connectivity Failed for eCrimeX!")
             return action_result.get_status()
 
         # Add the response into the data section
@@ -315,18 +312,21 @@ class ApwgEcrimeExchangeConnector(BaseConnector):
 
 def main():
     import argparse
+    import sys
 
     argparser = argparse.ArgumentParser()
 
     argparser.add_argument('input_test_json', help='Input Test JSON file')
     argparser.add_argument('-u', '--username', help='username', required=False)
     argparser.add_argument('-p', '--password', help='password', required=False)
+    argparser.add_argument('-v', '--verify', help='verify', required=False, default=False)
 
     args = argparser.parse_args()
     session_id = None
 
     username = args.username
     password = args.password
+    verify = args.verify
 
     if username is not None and password is None:
 
@@ -339,7 +339,7 @@ def main():
             login_url = ApwgEcrimeExchangeConnector._get_phantom_base_url() + '/login'
 
             print("Accessing the Login page")
-            r = requests.get(login_url, verify=False)
+            r = requests.get(login_url, verify=verify)
             csrftoken = r.cookies['csrftoken']
 
             data = dict()
@@ -352,11 +352,11 @@ def main():
             headers['Referer'] = login_url
 
             print("Logging into Platform to get the session id")
-            r2 = requests.post(login_url, verify=False, data=data, headers=headers)
+            r2 = requests.post(login_url, verify=verify, data=data, headers=headers)
             session_id = r2.cookies['sessionid']
         except Exception as e:
             print("Unable to get session id from the platform. Error: " + str(e))
-            exit(1)
+            sys.exit(1)
 
     with open(args.input_test_json) as f:
         in_json = f.read()
@@ -373,7 +373,7 @@ def main():
         ret_val = connector._handle_action(json.dumps(in_json), None)
         print(json.dumps(json.loads(ret_val), indent=4))
 
-    exit(0)
+    sys.exit(0)
 
 
 if __name__ == '__main__':

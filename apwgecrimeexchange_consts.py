@@ -12,3 +12,7 @@
 # the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 # either express or implied. See the License for the specific language governing permissions
 # and limitations under the License.
+
+ECRIMEX_ERR_CONNECTIVITY_TEST = "Test Connectivity Failed"
+ECRIMEX_SUCC_CONNECTIVITY_TEST = "Test Connectivity Passed"
+ECRIMEX_SANITIZE_ERR_MESSAGE = "Cannot sanitize exact URL!"
