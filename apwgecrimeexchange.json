@@ -22,6 +22,7 @@
     "main_module": "apwgecrimeexchange_connector.py",
     "min_phantom_version": "5.4.0",
     "app_wizard_version": "1.0.0",
+    "fips_compliant": false,
     "configuration": {
         "Authorization Key": {
             "description": "API Key for eCrimeX",

@@ -149,8 +149,6 @@ class ApwgEcrimeExchangeConnector(BaseConnector):
     def _make_rest_call(self, host, endpoint, action_result, method="get", **kwargs):
         # **kwargs can be any additional parameters that requests.request accepts
 
-        config = self.get_config()
-
         resp_json = None
 
         try:
@@ -168,7 +166,6 @@ class ApwgEcrimeExchangeConnector(BaseConnector):
             r = request_func(
                 url,
                 # auth=(username, password),  # basic authentication
-                verify=config.get('verify_server_cert', False),
                 **kwargs
             )
         except Exception as e:
@@ -190,14 +187,13 @@ class ApwgEcrimeExchangeConnector(BaseConnector):
         # The status and progress messages are more important.
 
         self.save_progress("Connecting to endpoint")
-        key = self._APWG_key
         headers = {
-            'Authorization': key,
+            'Authorization': self._APWG_key,
             'Content-Type': 'application/json'
         }
         # make rest call
         ret_val, response = self._make_rest_call(
-            'https://api.ecrimex.net', '/phish', action_result, headers=headers
+            self._base_url, '/phish', action_result, headers=headers
         )
 
         if phantom.is_fail(ret_val):
@@ -220,9 +216,8 @@ class ApwgEcrimeExchangeConnector(BaseConnector):
         # Access action parameters passed in the 'param' dictionary
 
         # Required values can be accessed directly
-        key = self._APWG_key
         headers = {
-            'Authorization': key,
+            'Authorization': self._APWG_key,
             'Content-Type': 'application/json'
         }
         url = param['url']
@@ -252,7 +247,7 @@ class ApwgEcrimeExchangeConnector(BaseConnector):
         self.debug_print(endpoint)
         # make rest call
         ret_val, response = self._make_rest_call(
-           'https://api.ecrimex.net', endpoint, action_result, headers=headers
+           self._base_url, endpoint, action_result, headers=headers
         )
         self.debug_print(ret_val)
         self.debug_print(response)
@@ -287,7 +282,9 @@ class ApwgEcrimeExchangeConnector(BaseConnector):
         # Load the state in initialize, use it to store data
         # that needs to be accessed across actions
         self._state = self.load_state()
-
+        if not isinstance(self._state, dict):
+            self.debug_print("Resetting the state file with the default format")
+            self._state = {"app_version": self.get_app_json().get("app_version")}
         # get the asset config
         config = self.get_config()
         """
@@ -300,8 +297,7 @@ class ApwgEcrimeExchangeConnector(BaseConnector):
         optional_config_name = config.get('optional_config_name')
         """
 
-        self._base_url = config.get('base_url')
-        self._APWG_key = config.get('Authorization Key')
+        self._APWG_key = config['Authorization Key']
         return phantom.APP_SUCCESS
 
     def finalize(self):
