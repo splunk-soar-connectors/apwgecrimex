@@ -16,8 +16,8 @@
         }
     ],
     "license": "Copyright (c) 2023-2025 Splunk Inc.",
-    "app_version": "1.0.1",
-    "utctime_updated": "2022-09-20T18:01:00.950982Z",
+    "app_version": "1.0.2",
+    "utctime_updated": "2025-04-11T20:35:17.719386Z",
     "package_name": "phantom_apwgecrimeexchange",
     "main_module": "apwgecrimeexchange_connector.py",
     "min_phantom_version": "5.4.0",
