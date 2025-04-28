@@ -1,7 +1,7 @@
 # APWG eCrime Exchange
 
 Publisher: Splunk Community \
-Connector Version: 1.0.2 \
+Connector Version: 1.0.3 \
 Product Vendor: APWG \
 Product Name: eCrimeX \
 Minimum Product Version: 6.3.0
